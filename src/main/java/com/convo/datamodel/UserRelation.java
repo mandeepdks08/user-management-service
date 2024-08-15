@@ -1,19 +1,19 @@
 package com.convo.datamodel;
 
-import java.time.LocalDateTime;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
+@Entity
+@Table(name = "userrelation")
 @Getter
 @Setter
-@Builder
-public class UserRelation {
-	private Long id;
+@SuperBuilder
+public class UserRelation extends DbBaseModel {
 	private String userId;
 	private String relatedUserId;
 	private RelationType relationType;
-	private LocalDateTime createdOn;
-	private LocalDateTime processedOn;
 }
