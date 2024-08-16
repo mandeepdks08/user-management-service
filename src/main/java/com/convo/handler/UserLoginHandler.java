@@ -18,8 +18,11 @@ public class UserLoginHandler {
 	@Autowired
 	private JwtUtil jwtUtil;
 
-	public LoginResponse login(LoginRequest loginRequest) {
+	public LoginResponse login(LoginRequest loginRequest) throws Exception {
 		User user = userRepo.findByEmail(loginRequest.getEmail());
+		if (user == null || !user.getPassword().equals(loginRequest.getPassword())) {
+			throw new Exception("Invalid credentials!");
+		}
 		String jwtToken = jwtUtil.generateToken(user);
 		return LoginResponse.builder().jwtToken(jwtToken).build();
 	}

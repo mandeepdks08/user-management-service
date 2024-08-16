@@ -70,7 +70,7 @@ public class UserController {
 			responseMessage = "Login successful!";
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {
-			responseMessage = "Login unsuccessful!";
+			responseMessage = e.getMessage();
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
 		return new ResponseEntity<>(BaseResponse.builder().message(responseMessage).build(), httpStatus);

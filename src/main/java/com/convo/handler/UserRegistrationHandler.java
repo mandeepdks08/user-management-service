@@ -1,5 +1,7 @@
 package com.convo.handler;
 
+import java.time.LocalDateTime;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +21,8 @@ public class UserRegistrationHandler {
 		String userId = RandomIdGenerator.generateRandomId(10);
 		System.out.println(userId);
 		User user = User.builder().userId(userId).name(request.getName()).email(request.getEmail())
-				.phone(request.getPhone()).build();
+				.password(request.getPassword()).phone(request.getPhone()).createdOn(LocalDateTime.now())
+				.processedOn(LocalDateTime.now()).build();
 		userRepo.save(user);
 	}
 
