@@ -3,6 +3,8 @@ package com.convo.util;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.convo.datamodel.User;
@@ -50,8 +52,8 @@ public class JwtUtil {
 				.signWith(SignatureAlgorithm.HS256, SECRET_KEY).compact();
 	}
 
-	public Boolean validateToken(String token, User userDetails) {
+	public Boolean validateToken(String token, UserDetails userDetails) {
 		final String username = extractUsername(token);
-		return (username.equals(userDetails.getEmail()) && !isTokenExpired(token));
+		return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
 	}
 }

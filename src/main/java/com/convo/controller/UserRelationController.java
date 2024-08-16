@@ -23,6 +23,7 @@ import com.convo.restmodel.AcceptFriendRequest;
 import com.convo.restmodel.AddFriendRequest;
 import com.convo.restmodel.BaseResponse;
 import com.convo.restmodel.FriendsListResponse;
+import com.convo.restmodel.PendingFriendRequestsResponse;
 import com.convo.restmodel.RejectFriendRequest;
 import com.convo.restmodel.RemoveFriendRequest;
 import com.convo.util.SystemContextHolder;
@@ -34,15 +35,15 @@ public class UserRelationController {
 
 	@Autowired
 	private UserRelationHandler userRelationHandler;
-	
+
 	@Autowired
 	private AddFriendValidator addFriendValidator;
-	
+
 	@InitBinder
 	protected void initBinder(WebDataBinder binder) {
 		binder.addValidators(addFriendValidator);
 	}
-	
+
 	@RequestMapping(value = "/friend/add", method = RequestMethod.POST)
 	protected ResponseEntity<BaseResponse> addFriend(@Valid @RequestBody AddFriendRequest addFriendRequest) {
 		User loggedInUser = SystemContextHolder.getLoggedInUser();
@@ -75,7 +76,13 @@ public class UserRelationController {
 		List<User> friendsList = userRelationHandler.getFriendsList();
 		return new ResponseEntity<>(FriendsListResponse.builder().friendsList(friendsList).build(), HttpStatus.OK);
 	}
-	
+
+	@RequestMapping(value = "/friend/request/list", method = RequestMethod.GET)
+	protected ResponseEntity<PendingFriendRequestsResponse> listFriendRequests() {
+		return new ResponseEntity<>(PendingFriendRequestsResponse.builder()
+				.pendingFriendRequests(userRelationHandler.getPendingFriendRequests()).build(), HttpStatus.OK);
+	}
+
 	private ResponseEntity<BaseResponse> processFriendRequest(Long requestId, ActionType actionType) {
 		HttpStatus httpStatus = null;
 		String responseMessage = null;

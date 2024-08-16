@@ -1,9 +1,11 @@
 package com.convo.handler;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -112,6 +114,16 @@ public class UserRelationHandler {
 			dbUserRelation.setProcessedOn(LocalDateTime.now());
 		}
 		userRelationRepo.save(dbUserRelation);
+	}
+
+	public List<UserRelationRequest> getPendingFriendRequests() {
+		User user = SystemContextHolder.getLoggedInUser();
+		List<UserRelationRequest> pendingFriendRequests = ObjectUtils
+				.firstNonNull(relationRequestRepo.findByToUserIdAndRelationRequestTypeAndState(user.getUserId(),
+						RelationRequestType.FRIEND_REQUEST, State.NEW), new ArrayList<>());
+		pendingFriendRequests = pendingFriendRequests.stream().map(UserRelationRequest::basicInfo)
+				.collect(Collectors.toList());
+		return pendingFriendRequests;
 	}
 
 	private void processFriendRequest(UserRelationRequest relationRequest, ActionType actionType) {

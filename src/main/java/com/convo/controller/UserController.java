@@ -72,6 +72,7 @@ public class UserController {
 		} catch (Exception e) {
 			responseMessage = e.getMessage();
 			httpStatus = HttpStatus.BAD_REQUEST;
+			e.printStackTrace();
 		}
 		return new ResponseEntity<>(BaseResponse.builder().message(responseMessage).build(), httpStatus);
 	}
