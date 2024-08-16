@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.convo.datamodel.ActionType;
 import com.convo.datamodel.RelationRequestType;
 import com.convo.datamodel.User;
+import com.convo.datamodel.UserBasicInfo;
 import com.convo.datamodel.UserRelationRequest;
 import com.convo.handler.UserRelationHandler;
 import com.convo.restmodel.AcceptFriendRequest;
@@ -73,14 +74,16 @@ public class UserRelationController {
 
 	@RequestMapping(value = "/friend/list", method = RequestMethod.GET)
 	protected ResponseEntity<FriendsListResponse> listFriends() {
-		List<User> friendsList = userRelationHandler.getFriendsList();
+		List<UserBasicInfo> friendsList = userRelationHandler.getFriendsList();
 		return new ResponseEntity<>(FriendsListResponse.builder().friendsList(friendsList).build(), HttpStatus.OK);
 	}
 
 	@RequestMapping(value = "/friend/request/list", method = RequestMethod.GET)
 	protected ResponseEntity<PendingFriendRequestsResponse> listFriendRequests() {
-		return new ResponseEntity<>(PendingFriendRequestsResponse.builder()
-				.pendingFriendRequests(userRelationHandler.getPendingFriendRequests()).build(), HttpStatus.OK);
+		return new ResponseEntity<>(
+				PendingFriendRequestsResponse.builder()
+						.pendingFriendRequests(userRelationHandler.getPendingFriendRequestsResponse()).build(),
+				HttpStatus.OK);
 	}
 
 	private ResponseEntity<BaseResponse> processFriendRequest(Long requestId, ActionType actionType) {

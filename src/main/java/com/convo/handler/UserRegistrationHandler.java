@@ -21,7 +21,7 @@ public class UserRegistrationHandler {
 		String userId = RandomIdGenerator.generateRandomId(10);
 		System.out.println(userId);
 		User user = User.builder().userId(userId).name(request.getName()).email(request.getEmail())
-				.password(request.getPassword()).phone(request.getPhone()).createdOn(LocalDateTime.now())
+				.password(request.getPassword()).phone(request.getPhone()).createdOn(LocalDateTime.now()).enabled(true)
 				.processedOn(LocalDateTime.now()).build();
 		userRepo.save(user);
 	}

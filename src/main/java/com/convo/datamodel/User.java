@@ -11,7 +11,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
@@ -20,9 +19,10 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @Setter
 @SuperBuilder
-@NoArgsConstructor
 @AllArgsConstructor
 public class User extends DbBaseModel implements UserDetails {
+	private static final long serialVersionUID = 1L;
+
 	@Column(name = "userid")
 	private String userId;
 	@Column(name = "name")
@@ -36,8 +36,11 @@ public class User extends DbBaseModel implements UserDetails {
 	@Column(name = "enabled")
 	private Boolean enabled;
 
-	public User basicInfo() {
-		return User.builder().userId(userId).name(name).build();
+	public User() {
+	}
+
+	public UserBasicInfo basicInfo() {
+		return UserBasicInfo.builder().name(name).userId(userId).enabled(enabled).build();
 	}
 
 	@Override

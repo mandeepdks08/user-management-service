@@ -3,6 +3,8 @@ package com.convo.handler;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -15,11 +17,13 @@ import com.convo.datamodel.RelationRequestType;
 import com.convo.datamodel.RelationType;
 import com.convo.datamodel.State;
 import com.convo.datamodel.User;
+import com.convo.datamodel.UserBasicInfo;
 import com.convo.datamodel.UserRelation;
 import com.convo.datamodel.UserRelationRequest;
 import com.convo.repository.UserRelationRepository;
 import com.convo.repository.UserRelationRequestRepository;
 import com.convo.repository.UserRepository;
+import com.convo.restmodel.PendingFriendRequest;
 import com.convo.util.SystemContextHolder;
 
 @Component
@@ -79,7 +83,7 @@ public class UserRelationHandler {
 		}
 	}
 
-	public List<User> getFriendsList() {
+	public List<UserBasicInfo> getFriendsList() {
 		User user = SystemContextHolder.getLoggedInUser();
 		List<UserRelation> userRelationList = userRelationRepo.findByUserIdAndRelationType(user.getUserId(),
 				RelationType.FRIEND);
@@ -123,7 +127,21 @@ public class UserRelationHandler {
 						RelationRequestType.FRIEND_REQUEST, State.NEW), new ArrayList<>());
 		pendingFriendRequests = pendingFriendRequests.stream().map(UserRelationRequest::basicInfo)
 				.collect(Collectors.toList());
-		return pendingFriendRequests;
+		return ObjectUtils.firstNonNull(pendingFriendRequests, new ArrayList<>());
+	}
+
+	public List<PendingFriendRequest> getPendingFriendRequestsResponse() {
+		List<UserRelationRequest> pendingFriendRequests = getPendingFriendRequests();
+		List<User> friendRequestUsers = userRepo.findByUserIdIn(
+				pendingFriendRequests.stream().map(UserRelationRequest::getFromUserId).collect(Collectors.toList()));
+		Map<String, UserRelationRequest> pendingFriendRequestUserIdMap = pendingFriendRequests.stream()
+				.collect(Collectors.toMap(relationRequest -> relationRequest.getFromUserId(), Function.identity(),
+						(e1, e2) -> e2));
+		return friendRequestUsers.stream().map(user -> {
+			LocalDateTime friendRequestDateTime = pendingFriendRequestUserIdMap.get(user.getUserId()).getCreatedOn();
+			return PendingFriendRequest.builder().requestDateTime(friendRequestDateTime).userDetails(user.basicInfo())
+					.build();
+		}).collect(Collectors.toList());
 	}
 
 	private void processFriendRequest(UserRelationRequest relationRequest, ActionType actionType) {
