@@ -16,6 +16,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PendingFriendRequest {
+	private Long id;
 	private LocalDateTime requestDateTime;
 	private UserBasicInfo userDetails;
 }

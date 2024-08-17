@@ -6,10 +6,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
-import com.convo.datamodel.RelationType;
 import com.convo.datamodel.User;
-import com.convo.datamodel.UserRelation;
-import com.convo.repository.UserRelationRepository;
+import com.convo.handler.UserRelationHandler;
 import com.convo.restmodel.AddFriendRequest;
 import com.convo.util.SystemContextHolder;
 
@@ -17,7 +15,7 @@ import com.convo.util.SystemContextHolder;
 public class AddFriendValidator implements Validator {
 
 	@Autowired
-	private UserRelationRepository userRelationRepo;
+	private UserRelationHandler userRelationHandler;
 
 	@Override
 	public boolean supports(Class<?> clazz) {
@@ -26,6 +24,9 @@ public class AddFriendValidator implements Validator {
 
 	@Override
 	public void validate(Object target, Errors errors) {
+		if (!(target instanceof AddFriendRequest)) {
+			return;
+		}
 		AddFriendRequest addFriendRequest = (AddFriendRequest) target;
 		User loggedInUser = SystemContextHolder.getLoggedInUser();
 
@@ -34,16 +35,23 @@ public class AddFriendValidator implements Validator {
 		} else if (addFriendRequest.getFriendUserId().equals(loggedInUser.getUserId())) {
 			errors.rejectValue("friendUserId", "friendUserId.invalid",
 					"friendUserId cannot be same as the logged in user id");
-		} else {
-			String friendUserId = addFriendRequest.getFriendUserId();
-			UserRelation userRelation = userRelationRepo.findByUserIdAndRelatedUserId(friendUserId,
-					loggedInUser.getUserId());
-			if (userRelation != null && userRelation.getRelationType().equals(RelationType.BLOCKED)) {
-				errors.rejectValue("friendUserId", "friendUserId.invalid", "Cannot send friend request to the user id "
-						+ friendUserId + " because you are blocked by that user");
-			}
 		}
 
+		String friendUserId = addFriendRequest.getFriendUserId();
+		if (userRelationHandler.isBlockedByUser(friendUserId, loggedInUser.getUserId())) {
+			errors.rejectValue("friendUserId", "friendUserId.invalid", "Cannot send friend request to the user id "
+					+ friendUserId + " because you are blocked by that user");
+		} else if (userRelationHandler.isBlockedByUser(loggedInUser.getUserId(), friendUserId)) {
+			errors.reject("friendUserId.invalid", "Cannot send friend request to the user id " + friendUserId
+					+ " because you have blocked that user. Please unblock the user first to send request.");
+		}
+
+		boolean requestPendingFromFriend = userRelationHandler.getPendingFriendRequests().stream()
+				.anyMatch(pendingRequest -> pendingRequest.getFromUserId().equals(friendUserId));
+		if (requestPendingFromFriend) {
+			errors.reject("friendUserId.invalid",
+					"You already have a friend request pending from user id " + friendUserId);
+		}
 	}
 
 }

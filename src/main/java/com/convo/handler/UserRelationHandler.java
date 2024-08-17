@@ -2,6 +2,7 @@ package com.convo.handler;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -39,8 +40,6 @@ public class UserRelationHandler {
 	private UserRepository userRepo;
 
 	public void saveUserRelationRequest(UserRelationRequest relationRequest) {
-		// Check (fromUserId == toUserId) case in validator
-		// Check if user is blocked in validator
 		User user = SystemContextHolder.getLoggedInUser();
 		relationRequestRepo.save(UserRelationRequest.builder().fromUserId(user.getUserId())
 				.toUserId(relationRequest.getToUserId()).relationRequestType(relationRequest.getRelationRequestType())
@@ -50,8 +49,7 @@ public class UserRelationHandler {
 	public void processUserRelationRequest(Long id, ActionType actionType) throws Exception {
 		User user = SystemContextHolder.getLoggedInUser();
 		UserRelationRequest relationRequest = relationRequestRepo.findById(id).orElse(null);
-		if (relationRequest == null || !StringUtils.equalsAny(user.getUserId(), relationRequest.getFromUserId(),
-				relationRequest.getToUserId())) {
+		if (relationRequest == null || !StringUtils.equals(user.getUserId(), relationRequest.getToUserId())) {
 			throw new Exception("Unauthorized");
 		}
 		if (relationRequest.getState().equals(State.NEW)) {
@@ -62,24 +60,25 @@ public class UserRelationHandler {
 			relationRequest.setState(State.PROCESSED);
 			relationRequest.setProcessedOn(LocalDateTime.now());
 			relationRequestRepo.save(relationRequest);
+		} else {
+			throw new Exception("Friend request accepted already!");
 		}
 	}
 
 	public void removeFriend(String friendUserId) {
 		User loggedInUser = SystemContextHolder.getLoggedInUser();
-		UserRelation dbUserRelation = userRelationRepo.findByUserIdAndRelatedUserId(loggedInUser.getUserId(),
-				friendUserId);
+		UserRelation dbUserRelation = userRelationRepo.findByUserIdAndRelatedUserIdAndRelationType(
+				loggedInUser.getUserId(), friendUserId, RelationType.FRIEND);
 		if (dbUserRelation != null) {
-			UserRelation friendUserRelation = userRelationRepo.findByUserIdAndRelatedUserId(friendUserId,
-					loggedInUser.getUserId());
+			UserRelation friendUserRelation = userRelationRepo.findByUserIdAndRelatedUserIdAndRelationType(friendUserId,
+					loggedInUser.getUserId(), RelationType.FRIEND);
 			friendUserRelation.setRelationType(RelationType.UNFRIEND);
 			friendUserRelation.setProcessedOn(LocalDateTime.now());
 
 			dbUserRelation.setRelationType(RelationType.UNFRIEND);
 			dbUserRelation.setProcessedOn(LocalDateTime.now());
 
-			userRelationRepo.save(dbUserRelation);
-			userRelationRepo.save(friendUserRelation);
+			userRelationRepo.saveAll(Arrays.asList(dbUserRelation, friendUserRelation));
 		}
 	}
 
@@ -94,6 +93,7 @@ public class UserRelationHandler {
 
 	public void blockUser(String blockUserId) {
 		User user = SystemContextHolder.getLoggedInUser();
+		removeFriend(blockUserId);
 		UserRelation dbUserRelation = userRelationRepo.findByUserIdAndRelatedUserId(user.getUserId(), blockUserId);
 		if (dbUserRelation == null) {
 			dbUserRelation = UserRelation.builder().userId(user.getUserId()).relatedUserId(blockUserId)
@@ -139,9 +139,15 @@ public class UserRelationHandler {
 						(e1, e2) -> e2));
 		return friendRequestUsers.stream().map(user -> {
 			LocalDateTime friendRequestDateTime = pendingFriendRequestUserIdMap.get(user.getUserId()).getCreatedOn();
-			return PendingFriendRequest.builder().requestDateTime(friendRequestDateTime).userDetails(user.basicInfo())
-					.build();
+			Long id = pendingFriendRequestUserIdMap.get(user.getUserId()).getId();
+			return PendingFriendRequest.builder().id(id).requestDateTime(friendRequestDateTime)
+					.userDetails(user.basicInfo()).build();
 		}).collect(Collectors.toList());
+	}
+
+	public boolean isBlockedByUser(String userId1, String userId2) {
+		UserRelation userRelation = userRelationRepo.findByUserIdAndRelatedUserId(userId1, userId2);
+		return userRelation != null && userRelation.getRelationType().equals(RelationType.BLOCKED);
 	}
 
 	private void processFriendRequest(UserRelationRequest relationRequest, ActionType actionType) {
@@ -168,8 +174,7 @@ public class UserRelationHandler {
 					loggedInUserRelation.setRelationType(RelationType.FRIEND);
 					loggedInUserRelation.setProcessedOn(LocalDateTime.now());
 				}
-				userRelationRepo.save(friendUserRelation);
-				userRelationRepo.save(loggedInUserRelation);
+				userRelationRepo.saveAll(Arrays.asList(friendUserRelation, loggedInUserRelation));
 			}
 		}
 	}

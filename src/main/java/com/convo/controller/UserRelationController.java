@@ -1,12 +1,14 @@
 package com.convo.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,19 +42,24 @@ public class UserRelationController {
 	@Autowired
 	private AddFriendValidator addFriendValidator;
 
-	@InitBinder
+	@InitBinder("addFriendRequest")
 	protected void initBinder(WebDataBinder binder) {
 		binder.addValidators(addFriendValidator);
 	}
 
 	@RequestMapping(value = "/friend/add", method = RequestMethod.POST)
-	protected ResponseEntity<BaseResponse> addFriend(@Valid @RequestBody AddFriendRequest addFriendRequest) {
+	protected ResponseEntity<BaseResponse> addFriend(@Valid @RequestBody AddFriendRequest request,
+			BindingResult bindingResult) {
+		if (bindingResult.hasErrors()) {
+			List<String> errors = bindingResult.getAllErrors().stream().map(err -> err.getDefaultMessage())
+					.collect(Collectors.toList());
+			return new ResponseEntity<>(BaseResponse.builder().errors(errors).build(), HttpStatus.BAD_REQUEST);
+		}
 		User loggedInUser = SystemContextHolder.getLoggedInUser();
 		UserRelationRequest userRelationRequest = UserRelationRequest.builder().fromUserId(loggedInUser.getUserId())
-				.toUserId(addFriendRequest.getFriendUserId()).relationRequestType(RelationRequestType.FRIEND_REQUEST)
-				.build();
+				.toUserId(request.getFriendUserId()).relationRequestType(RelationRequestType.FRIEND_REQUEST).build();
 		userRelationHandler.saveUserRelationRequest(userRelationRequest);
-		return new ResponseEntity<>(BaseResponse.builder().message("Request send successfully!").build(),
+		return new ResponseEntity<>(BaseResponse.builder().message("Request sent successfully!").build(),
 				HttpStatus.OK);
 	}
 

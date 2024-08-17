@@ -32,6 +32,6 @@ public class UserRelationRequest extends DbBaseModel {
 	private State state;
 
 	public UserRelationRequest basicInfo() {
-		return UserRelationRequest.builder().fromUserId(fromUserId).createdOn(createdOn).build();
+		return UserRelationRequest.builder().id(id).fromUserId(fromUserId).createdOn(createdOn).build();
 	}
 }

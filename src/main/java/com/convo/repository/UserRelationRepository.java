@@ -11,6 +11,9 @@ import com.convo.datamodel.UserRelation;
 @Repository
 public interface UserRelationRepository extends JpaRepository<UserRelation, Long> {
 	public UserRelation findByUserIdAndRelatedUserId(String userId, String relatedUserId);
-	
+
+	public UserRelation findByUserIdAndRelatedUserIdAndRelationType(String userId, String relatedUserId,
+			RelationType relationType);
+
 	public List<UserRelation> findByUserIdAndRelationType(String userId, RelationType relationType);
 }
