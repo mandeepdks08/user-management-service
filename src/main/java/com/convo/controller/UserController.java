@@ -3,6 +3,7 @@ package com.convo.controller;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import com.convo.handler.UserHandler;
 import com.convo.handler.UserLoginHandler;
 import com.convo.handler.UserRelationHandler;
 import com.convo.handler.UserUpdateHandler;
+import com.convo.restmodel.AuthenticationResponse;
 import com.convo.restmodel.BaseResponse;
 import com.convo.restmodel.BlockUserRequest;
 import com.convo.restmodel.ListUsersRequest;
@@ -103,6 +105,23 @@ public class UserController {
 			status = HttpStatus.INTERNAL_SERVER_ERROR;
 		}
 		return new ResponseEntity<>(response, status);
+	}
+
+	@RequestMapping(value = "/authenticate", method = RequestMethod.POST)
+	protected ResponseEntity<AuthenticationResponse> authenticate(@RequestBody JSONObject request) {
+		AuthenticationResponse response = AuthenticationResponse.builder().build();
+		HttpStatus httpStatus = null;
+		try {
+			String token = request.getString("token");
+			User user = userHandler.authenticate(token);
+			response.setAuthenticated(true);
+			response.setUser(user);
+			httpStatus = HttpStatus.OK;
+		} catch (Exception e) {
+			response.setAuthenticated(false);
+			httpStatus = HttpStatus.UNAUTHORIZED;
+		}
+		return new ResponseEntity<>(response, httpStatus);
 	}
 
 }
