@@ -12,12 +12,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.convo.datamodel.User;
+import com.convo.handler.UserHandler;
 import com.convo.handler.UserLoginHandler;
-import com.convo.handler.UserRegistrationHandler;
 import com.convo.handler.UserRelationHandler;
 import com.convo.handler.UserUpdateHandler;
 import com.convo.restmodel.BaseResponse;
 import com.convo.restmodel.BlockUserRequest;
+import com.convo.restmodel.ListUsersRequest;
+import com.convo.restmodel.ListUsersResponse;
 import com.convo.restmodel.LoginRequest;
 import com.convo.restmodel.LoginResponse;
 import com.convo.restmodel.UserRegisterRequest;
@@ -27,7 +29,7 @@ import com.convo.restmodel.UserRegisterRequest;
 public class UserController {
 
 	@Autowired
-	private UserRegistrationHandler registrationHandler;
+	private UserHandler userHandler;
 
 	@Autowired
 	private UserUpdateHandler updateHandler;
@@ -40,7 +42,7 @@ public class UserController {
 
 	@RequestMapping(value = "/register", method = RequestMethod.POST)
 	protected ResponseEntity<BaseResponse> register(@RequestBody UserRegisterRequest registrationRequest) {
-		registrationHandler.register(registrationRequest);
+		userHandler.register(registrationRequest);
 		BaseResponse res = BaseResponse.builder().message("Registration successful!").build();
 		return new ResponseEntity<>(res, HttpStatus.CREATED);
 	}
@@ -87,6 +89,20 @@ public class UserController {
 	protected ResponseEntity<BaseResponse> unblock(@RequestBody BlockUserRequest blockUserRequest) {
 		userRelationHandler.unblockUser(blockUserRequest.getBlockUserId());
 		return new ResponseEntity<>(BaseResponse.builder().message("Success").build(), HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/list", method = RequestMethod.POST)
+	protected ResponseEntity<ListUsersResponse> listUsers(@RequestBody ListUsersRequest request) {
+		ListUsersResponse response = ListUsersResponse.builder().build();
+		HttpStatus status = null;
+		try {
+			response.setUsers(userHandler.listUsers(request.getUserIds()));
+			status = HttpStatus.OK;
+		} catch (Exception e) {
+			response.setMessage(e.getMessage());
+			status = HttpStatus.INTERNAL_SERVER_ERROR;
+		}
+		return new ResponseEntity<>(response, status);
 	}
 
 }
