@@ -24,11 +24,12 @@ public class WebSecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
         .authorizeRequests()
-    		.antMatchers("/user/v1/register**", "/user/v1/login**").permitAll()
+    		.antMatchers("/user/v1/register**", "/user/v1/login**", "/user/v1/authenticate**").permitAll()
             .anyRequest().authenticated()
         .and()
         .csrf().disable()
-        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        .cors().disable()
+        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
 		
 		http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

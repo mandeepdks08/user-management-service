@@ -22,8 +22,10 @@ import com.convo.util.JwtUtil;
 import com.convo.util.SystemContextHolder;
 
 import io.jsonwebtoken.ExpiredJwtException;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	@Autowired
@@ -34,16 +36,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	@Override
 	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-		return StringUtils.equalsAny(request.getRequestURI(), "/user/v1/login", "/user/v1/register");
+		return StringUtils.equalsAny(request.getRequestURI(), "/user/v1/login", "/user/v1/register", "/user/v1/authenticate");
 	}
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 		final String authorizationHeader = request.getHeader("Authorization");
-
-		if (authenticate(authorizationHeader) == true
-				&& SecurityContextHolder.getContext().getAuthentication() == null) {
+		log.info("In JWT Authentication filter");
+		if (authenticate(authorizationHeader) == true) {
 			String jwt = authorizationHeader.substring(7);
 			String username = jwtUtil.extractUsername(jwt);
 			UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);

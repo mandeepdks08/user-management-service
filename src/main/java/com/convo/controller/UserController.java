@@ -1,8 +1,13 @@
 package com.convo.controller;
 
+import java.io.BufferedReader;
+import java.util.Map;
+
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,9 +30,13 @@ import com.convo.restmodel.ListUsersResponse;
 import com.convo.restmodel.LoginRequest;
 import com.convo.restmodel.LoginResponse;
 import com.convo.restmodel.UserRegisterRequest;
+import com.google.gson.Gson;
+
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/user/v1")
+@Slf4j
 public class UserController {
 
 	@Autowired
@@ -108,11 +117,11 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/authenticate", method = RequestMethod.POST)
-	protected ResponseEntity<AuthenticationResponse> authenticate(@RequestBody JSONObject request) {
+	protected ResponseEntity<AuthenticationResponse> authenticate(@RequestBody Map<String, String> request) {
 		AuthenticationResponse response = AuthenticationResponse.builder().build();
 		HttpStatus httpStatus = null;
 		try {
-			String token = request.getString("token");
+			String token = request.get("token");
 			User user = userHandler.authenticate(token);
 			response.setAuthenticated(true);
 			response.setUser(user);
