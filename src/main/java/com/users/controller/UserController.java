@@ -1,14 +1,10 @@
 package com.users.controller;
 
-import java.io.BufferedReader;
 import java.util.Map;
 
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.tomcat.util.http.fileupload.IOUtils;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.gson.Gson;
 import com.users.datamodel.User;
 import com.users.handler.UserHandler;
 import com.users.handler.UserLoginHandler;
@@ -38,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/user/v1")
 @Slf4j
 public class UserController {
-
+	
 	@Autowired
 	private UserHandler userHandler;
 
@@ -50,7 +45,7 @@ public class UserController {
 
 	@Autowired
 	private UserRelationHandler userRelationHandler;
-
+	
 	@RequestMapping(value = "/register", method = RequestMethod.POST)
 	protected ResponseEntity<BaseResponse> register(@RequestBody UserRegisterRequest registrationRequest) {
 		userHandler.register(registrationRequest);
