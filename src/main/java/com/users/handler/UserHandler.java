@@ -15,7 +15,10 @@ import com.users.security.JwtAuthenticationFilter;
 import com.users.util.JwtUtil;
 import com.users.util.RandomIdGenerator;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Component
+@Slf4j
 public class UserHandler {
 
 	@Autowired
@@ -44,18 +47,20 @@ public class UserHandler {
 	public User authenticate(String token) throws Exception {
 		try {
 			if (jwtAuthFilter.authenticate(token) == true) {
+				log.info("Successfully authenticated token {}", token);
 				String email = jwtUtil.extractUsername(token.substring(7));
 				return userRepo.findByEmail(email);
 			} else {
 				throw new Exception("Authentication failed!");
 			}
 		} catch (Exception e) {
+			log.error("Exception while authenticating token {}", token, e);
 			throw e;
 		}
 	}
 
 	private void validateRegistrationRequest(UserRegisterRequest request) {
-
+		
 	}
 
 }

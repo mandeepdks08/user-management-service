@@ -26,6 +26,7 @@ import com.users.restmodel.ListUsersResponse;
 import com.users.restmodel.LoginRequest;
 import com.users.restmodel.LoginResponse;
 import com.users.restmodel.UserRegisterRequest;
+import com.users.util.GsonUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -113,6 +114,7 @@ public class UserController {
 
 	@RequestMapping(value = "/authenticate", method = RequestMethod.POST)
 	protected ResponseEntity<AuthenticationResponse> authenticate(@RequestBody Map<String, String> request) {
+		log.info("Request came for authentication {}", GsonUtils.getGson().toJson(request));
 		AuthenticationResponse response = AuthenticationResponse.builder().build();
 		HttpStatus httpStatus = null;
 		try {
