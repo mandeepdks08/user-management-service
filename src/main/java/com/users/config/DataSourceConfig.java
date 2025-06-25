@@ -27,7 +27,7 @@ public class DataSourceConfig {
 	@Value("${spring.datasource.password}")
 	private String dbPassword;
 
-	@Value("${awsSecretName}")
+	@Value("${aws.datasource.secret.name}")
 	private String awsSecretName;
 
 	@Bean

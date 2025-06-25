@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueResponse;
@@ -16,7 +15,7 @@ public class AwsSecretsManager {
 	private final SecretsManagerClient secretsManagerClient;
 
 	public AwsSecretsManager() {
-		this.secretsManagerClient = SecretsManagerClient.builder().region(Region.AP_SOUTH_1) // Replace with your region
+		this.secretsManagerClient = SecretsManagerClient.builder()
 				.credentialsProvider(DefaultCredentialsProvider.create()).build();
 	}
 
