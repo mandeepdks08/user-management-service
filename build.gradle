@@ -65,7 +65,7 @@ dependencies {
 	implementation 'javax.validation:validation-api:2.0.1.Final'
 	
 	// https://mvnrepository.com/artifact/org.postgresql/postgresql
-	implementation 'org.postgresql:postgresql:42.2.5'
+	implementation 'org.postgresql:postgresql:42.7.3'
 	
 	implementation 'org.json:json:20180813'
 	
