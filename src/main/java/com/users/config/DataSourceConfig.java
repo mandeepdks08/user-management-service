@@ -4,9 +4,9 @@ import javax.sql.DataSource;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import lombok.extern.slf4j.Slf4j;
@@ -18,26 +18,18 @@ public class DataSourceConfig {
 	@Autowired
 	private AwsSecretsManager awsSecretManager;
 
-	@Value("${spring.datasource.url}")
-	private String dbUrl;
-
-	@Value("${spring.datasource.username}")
-	private String dbUsername;
-
-	@Value("${spring.datasource.password}")
-	private String dbPassword;
-
-	@Value("${aws.datasource.secret.name}")
-	private String awsSecretName;
+	@Autowired
+	private Environment env;
 
 	@Bean
 	public DataSource dataSource() {
 		// Try fetching credentials from AWS Secrets Manager
+		String awsSecretName = env.getProperty("aws.datasource.secret.name");
 		String secretJson = awsSecretManager.getSecret(awsSecretName);
 
-		String url = dbUrl; // Default to application.properties
-		String username = dbUsername; // Default to application.properties
-		String password = dbPassword; // Default to application.properties
+		String url = env.getProperty("spring.datasource.url"); // Default to application.properties
+		String username = env.getProperty("spring.datasource.username"); // Default to application.properties
+		String password = env.getProperty("spring.datasource.password"); // Default to application.properties
 
 		if (secretJson != null) {
 			url = parseJson(secretJson, "url");
