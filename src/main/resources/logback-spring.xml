@@ -1,7 +1,8 @@
 <configuration>
+
+	<springProperty scope="context" name="SERVICE_LOG_PATH" source="logging.file.path"/>
+	
 	<!-- Define log file location and pattern -->
-	<property name="SERVICE_LOG_FILE"
-		value="/Users/mandeep/Desktop/grep logs/logs/user-management-service/service.log" />
 	<property name="SERVICE_LOG_PATTERN"
 		value="%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} [%X{traceId:-N/A}] [%X{spanId:-N/A}] - %msg%n" />
 
@@ -16,12 +17,11 @@
 	<!-- File Appender for logging to a file -->
 	<appender name="FILE"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${SERVICE_LOG_FILE}</file>
+		<file>${SERVICE_LOG_PATH}/service.log</file>
 		<rollingPolicy
 			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<!-- Roll log file daily and keep 30 days of history -->
-			<fileNamePattern>/Users/mandeep/Desktop/grep
-				logs/logs/user-management-service/service-%d{yyyy-MM-dd}.log</fileNamePattern>
+			<fileNamePattern>${SERVICE_LOG_PATH}/service-%d{yyyy-MM-dd}.log</fileNamePattern>
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
 		<encoder>
