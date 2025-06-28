@@ -1,5 +1,7 @@
 package com.users.config;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
@@ -12,9 +14,10 @@ import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRespon
 @Slf4j
 public class AwsSecretsManager {
 
-	private final SecretsManagerClient secretsManagerClient;
+	private SecretsManagerClient secretsManagerClient;
 
-	public AwsSecretsManager() {
+	@PostConstruct
+	private void init() {
 		this.secretsManagerClient = SecretsManagerClient.builder()
 				.credentialsProvider(DefaultCredentialsProvider.create()).build();
 	}
