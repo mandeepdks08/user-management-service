@@ -32,7 +32,7 @@ public class DataSourceConfig {
 		String password = env.getProperty("spring.datasource.password"); // Default to application.properties
 
 		if (secretJson != null) {
-			url = parseJson(secretJson, "url");
+			url = parseJson(secretJson, "host");
 			username = parseJson(secretJson, "username");
 			password = parseJson(secretJson, "password");
 		}
