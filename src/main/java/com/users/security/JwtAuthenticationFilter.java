@@ -34,12 +34,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	@Autowired
 	private UserDetailsService userDetailsService;
 
-//	@Override
-//	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-//		return StringUtils.equalsAny(request.getRequestURI(), "/user/v1/login", "/user/v1/register",
-//				"/user/v1/authenticate", "/user/actuator/health");
-//	}
-
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
@@ -66,6 +60,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				username = jwtUtil.extractUsername(jwt);
 			} catch (ExpiredJwtException e) {
 				throw new IOException("Authorization token is expired!");
+			} catch (Exception e) {
+				log.error("Authentication failed with an error", e);
 			}
 			if (username != null) {
 				UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);

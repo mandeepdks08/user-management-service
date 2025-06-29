@@ -20,19 +20,6 @@ public class WebSecurityConfig {
 	
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//		http
-//        .authorizeRequests()
-//    		.antMatchers("/user/v1/register**", "/user/v1/login**", "/user/v1/authenticate**", "/user/actuator**").permitAll()
-//            .anyRequest().authenticated()
-//        .and()
-//        .csrf().disable()
-//        .cors().disable()
-//        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
-//		
-//		http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-//
-//		return http.build();
-		
 		return http
 	            .csrf(csrf -> csrf.disable()) // Disable CSRF because we use JWTs (no cookies)
 	            .cors(cors -> cors.disable())
