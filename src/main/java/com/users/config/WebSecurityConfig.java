@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,7 +13,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.users.security.JwtAuthenticationFilter;
 
 @Configuration
-@EnableWebSecurity
 public class WebSecurityConfig {
 	
 	@Autowired
@@ -22,18 +20,30 @@ public class WebSecurityConfig {
 	
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http
-        .authorizeRequests()
-    		.antMatchers("/user/v1/register**", "/user/v1/login**", "/user/v1/authenticate**", "/user/actuator**").permitAll()
-            .anyRequest().authenticated()
-        .and()
-        .csrf().disable()
-        .cors().disable()
-        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
+//		http
+//        .authorizeRequests()
+//    		.antMatchers("/user/v1/register**", "/user/v1/login**", "/user/v1/authenticate**", "/user/actuator**").permitAll()
+//            .anyRequest().authenticated()
+//        .and()
+//        .csrf().disable()
+//        .cors().disable()
+//        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
+//		
+//		http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+//
+//		return http.build();
 		
-		http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-
-		return http.build();
+		return http
+	            .csrf(csrf -> csrf.disable()) // Disable CSRF because we use JWTs (no cookies)
+	            .cors(cors -> cors.disable())
+	            .sessionManagement(session -> session
+	                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // No sessions
+	            .authorizeHttpRequests(auth -> auth
+	            	.antMatchers("/user/v1/register", "/user/v1/login", "/user/v1/authenticate", "/user/actuator/**").permitAll() // Open endpoints
+	                .anyRequest().authenticated() // Everything else needs JWT
+	            )
+	            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+	            .build();
 	}
 	
 	@Bean
